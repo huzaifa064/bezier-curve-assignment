@@ -6,29 +6,27 @@
 **GUI:** Tkinter  
 **Dependencies:** Python standard library only
 
-## 1. Project overview
+## 1. Project Overview
 
-This application demonstrates a Bézier curve defined by a sequence of control points.
+This project is an interactive application for creating and visualizing Bézier curves using Python.
 
-The user can add, move and delete control points. The program redraws the curve approximation after every change. It uses adaptive refinement: a Bézier segment is subdivided at `t = 1/2` while at least one edge of its control polygon has length greater than or equal to epsilon.
+A Bézier curve is controlled by a set of points called **control points**. The user can add, move, and delete these points using the mouse. The application automatically updates the curve whenever the control points change.
 
-The application can also visualize the de Casteljau construction for a user-selected parameter `t`, including the point on the curve, tangent and normal vectors.
+The program also demonstrates adaptive subdivision, the de Casteljau algorithm, and the tangent and normal vectors of a Bézier curve.
 
 ## 2. Requirements
 
 - Python 3.8 or newer.
-- Tkinter, which is included with most standard Python installations.
-- No third-party Python packages are required.
+- Tkinter.
+- No additional Python packages are required.
 
-On some Linux installations, Tkinter may need to be installed separately by the operating system package manager.
+## 3. How to Run
 
-## 3. How to run
-
-Open a terminal in the folder containing `main.py`.
+Open PowerShell or a terminal inside the project folder.
 
 **Windows:**
 
-```powershell
+```bash
 py main.py
 ```
 
@@ -38,99 +36,160 @@ py main.py
 python3 main.py
 ```
 
-## Application Screenshot
+## 4. Application Screenshot
 
 ![Bézier Curve Application](img.png)
 
-## 4. How to use the application
+## 5. How to Use the Application
 
-1. Left-click an empty part of the canvas to add a control point.
-2. Left-click a control point and drag it to change its position.
-3. Right-click a control point to delete it.
-4. Move the **Epsilon** slider to change the maximum allowed edge length.
-5. Select **Show refined control polygons** to display the control polygons of the final subcurves.
-6. Select **Show de Casteljau construction** to display the interpolation rows, curve point, tangent and normal.
-7. Move the **t** slider to change the parameter used for the de Casteljau construction.
-8. Press **Reset / clear points** to remove all control points.
+1. **Add points:** Left-click on the drawing area to create control points.
+2. **Move points:** Click and drag an existing control point.
+3. **Delete points:** Right-click on a control point.
+4. **Change epsilon:** Use the Epsilon slider to control the subdivision level.
+5. **Show refined polygons:** Enable the option to display the control polygons of the subdivided curves.
+6. **Show de Casteljau construction:** Enable this option to visualize the interpolation process.
+7. **Change parameter t:** Move the t slider to calculate different points on the curve.
+8. **Reset:** Click the Reset / clear points button to remove all control points.
 
-## 5. Mathematical concepts
+## 6. Mathematical Background
 
-### Bézier curve
+### 6.1 What is a Bézier Curve?
 
-A Bézier curve of degree `n` is defined by control points `P0, P1, ..., Pn`. Its parameter is `t` in the interval `[0, 1]`.
+A Bézier curve is a parametric curve defined by a sequence of control points.
 
-For a cubic curve:
+For a cubic Bézier curve, there are four control points:
 
-\[
-B(t)=(1-t)^3P_0+3(1-t)^2tP_1+3(1-t)t^2P_2+t^3P_3.
-\]
+- \(P_0\) — starting point
+- \(P_1\) — first intermediate control point
+- \(P_2\) — second intermediate control point
+- \(P_3\) — ending point
 
-The curve starts at the first control point and ends at the last control point. The intermediate control points influence its shape.
+The mathematical formula is:
 
-### de Casteljau algorithm
+$$
+B(t)=(1-t)^3P_0+3(1-t)^2tP_1+3(1-t)t^2P_2+t^3P_3
+$$
 
-The algorithm repeatedly interpolates between neighbouring points:
+where:
 
-\[
-b_i^k(t)=(1-t)b_i^{k-1}(t)+t b_{i+1}^{k-1}(t).
-\]
+$$
+0\leq t\leq 1
+$$
 
-The final point is `B(t)`. The application stores all rows so they can be drawn on the canvas.
+The curve starts at \(P_0\) and ends at \(P_3\). The intermediate control points influence the shape and direction of the curve.
 
-### Subdivision at the midpoint
+### 6.2 de Casteljau Algorithm
 
-For adaptive refinement, the curve is split at `t = 1/2`. The first point of each de Casteljau row forms the left subcurve's control points. The last point of each row, read in reverse row order, forms the right subcurve's control points.
+The de Casteljau algorithm calculates a point on a Bézier curve using repeated linear interpolation between neighbouring points.
 
-### Adaptive refinement and epsilon
+The interpolation formula is:
 
-A control polygon is subdivided if at least one neighbouring pair satisfies:
+$$
+\displaystyle b_i^k(t)=(1-t)b_i^{k-1}(t)+t\,b_{i+1}^{k-1}(t)
+$$
 
-\[
-\|P_{i+1}-P_i\|\geq\varepsilon.
-\]
+Here:
 
-Subdivision continues until all edges of a final control polygon are shorter than epsilon, subject to a recursion safety limit in the implementation.
+- \(t\) is the parameter between 0 and 1.
+- \(k\) represents the interpolation step.
+- \(b\) represents the points calculated during the algorithm.
 
-- Smaller epsilon generally produces more subdivisions.
+The process continues until only one point remains. This final point is the position of the Bézier curve at parameter \(t\).
+
+The application displays the intermediate points and connecting lines to make this process visible.
+
+### 6.3 Subdivision at \(t=\frac{1}{2}\)
+
+The application divides a Bézier curve into two smaller curves using the de Casteljau algorithm at:
+
+$$
+t=\frac{1}{2}
+$$
+
+The first point from each interpolation row forms the control points of the left curve.
+
+The last point from each row forms the control points of the right curve, after reversing their collected order.
+
+Both resulting curves represent parts of the original Bézier curve.
+
+### 6.4 Adaptive Refinement and Epsilon
+
+Adaptive refinement is used to divide the curve into smaller segments.
+
+The application checks the distance between neighbouring control points:
+
+$$
+\left\|P_{i+1}-P_i\right\|\geq\varepsilon
+$$
+
+If at least one edge satisfies this condition, the curve is subdivided again at \(t=\frac{1}{2}\).
+
+The process continues until all edges of the final control polygons are shorter than epsilon, or the recursion safety limit is reached.
+
+**Effect of epsilon:**
+
+- Smaller epsilon generally produces more subdivisions and a more detailed approximation.
 - Larger epsilon generally produces fewer subdivisions.
-- The slider has a minimum value of 10.
+- The minimum value available in the slider is 10.
 
-The curve approximation is drawn by connecting the endpoints of the final refined segments. The final control polygons can also be displayed.
+The application draws the approximation by connecting the endpoints of the final refined segments.
 
-### Tangent and normal
+### 6.5 Tangent and Normal Vectors
 
-For a degree `n` Bézier curve, the derivative direction is calculated from the last two de Casteljau rows:
+A tangent vector describes the direction of the curve at a particular parameter \(t\).
 
-\[
-B'(t)=n\left(b_1^{n-1}(t)-b_0^{n-1}(t)\right).
-\]
+For a Bézier curve of degree \(n\), the derivative is:
 
-A normal direction is obtained by rotating the tangent vector `(x, y)` to `(-y, x)`. The displayed arrows are scaled to a fixed screen length for visibility.
+$$
+B'(t)=n\left(b_1^{n-1}(t)-b_0^{n-1}(t)\right)
+$$
 
-## 6. Main source-code structure
+A normal vector is perpendicular to the tangent vector.
 
-| Function / class | Responsibility |
+If the tangent vector is:
+
+$$
+T=(a,b)
+$$
+
+one possible normal direction is:
+
+$$
+N=(-b,a)
+$$
+
+The application displays both vectors as arrows on the drawing area.
+
+## 7. Main Source Code Structure
+
+| Function / Class | Purpose |
 |---|---|
-| `interpolate` | Linear interpolation between two points |
-| `de_casteljau` | Calculates and returns all de Casteljau rows |
-| `subdivide_at_half` | Splits a Bézier curve at `t = 1/2` |
-| `has_edge_at_least_epsilon` | Checks the assignment's edge-length condition |
-| `refine_curve` | Recursively subdivides the curve |
-| `bezier_tangent` | Calculates the tangent vector |
-| `BezierApplication` | Creates the GUI and handles user interaction and drawing |
+| `interpolate` | Calculates linear interpolation between two points. |
+| `de_casteljau` | Calculates the interpolation rows and the final curve point. |
+| `subdivide_at_half` | Divides a Bézier curve into two smaller curves. |
+| `has_edge_at_least_epsilon` | Checks whether a control polygon needs subdivision. |
+| `refine_curve` | Recursively subdivides the curve. |
+| `bezier_tangent` | Calculates the tangent direction. |
+| `BezierApplication` | Creates the graphical interface and manages user interactions. |
 
-## 7. Suggested presentation order
+## 8. Presentation Demonstration
 
-1. Introduce the purpose of the application and the control points.
-2. Demonstrate adding, moving and deleting points.
-3. Explain the control polygon and the Bézier curve approximation.
-4. Change epsilon and explain why the number of refined segments changes.
-5. Enable the de Casteljau construction and move `t` from 0 to 1.
-6. Identify the curve point, tangent and normal.
-7. Explain how the code separates geometry calculations from the Tkinter interface.
+The following sequence can be used to demonstrate the application:
 
-## 8. Important implementation note
+1. Explain what a Bézier curve is and identify its control points.
+2. Add four control points to the drawing area.
+3. Show how moving a control point changes the curve.
+4. Demonstrate deleting a control point.
+5. Change epsilon and observe how the number of subdivisions changes.
+6. Enable the de Casteljau construction.
+7. Move the \(t\) slider and observe how the point on the curve changes.
+8. Identify the tangent and normal vectors.
+9. Briefly explain how the mathematical functions are connected to the graphical interface.
 
-The recursive refinement function has a maximum recursion depth of 24 as a safety limit. If this limit is reached, a segment is returned even if an edge is still at least epsilon. For ordinary canvas-sized inputs and the provided epsilon range, this limit is intended to prevent excessive recursion.
+## 9. Implementation Notes
 
-The approximation method follows the assignment's specified control-polygon edge-length subdivision condition. It is not a separate flatness-error test.
+The recursive refinement function includes a maximum recursion depth of 24 to prevent excessive recursion.
+
+If this limit is reached, a segment is returned even if its control polygon still contains an edge whose length is greater than or equal to epsilon.
+
+The approximation follows the assignment's specified control-polygon edge-length condition. It does not use a separate flatness-error test.
